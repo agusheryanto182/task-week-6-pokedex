@@ -1,4 +1,5 @@
 let pokemonData = [];
+let filteredPokemon = [];
 
 // background color types
 const typeColors = {
@@ -33,6 +34,7 @@ async function fetchPokemon() {
     }
     const data = await response.json();
     pokemonData = data;
+    filteredPokemon = pokemonData.slice(0, 100);
     renderApp();
   } catch (error) {
     console.error("Failed to fetch Pokemon data:", error);
@@ -45,7 +47,7 @@ function PokemonCard(props) {
   return React.createElement(
     "div",
     {
-      className: "m-4 transition-all z-[1] duration-300 hover:scale-105 rounded-md relative",
+      className: "m-4 transition-all duration-300 hover:scale-105 rounded-md relative",
       onMouseEnter: (event) => {
         const audio = new Audio(props.cries.latest);
         const popUp = document.createElement("div");
@@ -96,8 +98,9 @@ function PokemonCard(props) {
         React.createElement(
           "div",
           { className: "flex items-center justify-between mt-2" },
-          props.types.map((type) =>
+          props.types.map((type, index) =>
             React.createElement("p", {
+              key: `type-${index}`,
               className: `flex justify-center items-center text-white font-bold
                text-sm w-[70px] h-[25px] rounded-md ${typeColors[type] || "bg-gray-300"}`
             }, type)
@@ -111,7 +114,7 @@ function PokemonCard(props) {
 
 // List component
 function PokemonList() {
-  if (pokemonData.length === 0) {
+  if (filteredPokemon.length === 0) {
     return React.createElement(
       "p",
       { className: "text-center flex justify-center items-center" },
@@ -121,8 +124,12 @@ function PokemonList() {
 
   return React.createElement(
     "div",
-    { className: "max-w-6xl bg-white mx-auto flex flex-wrap justify-center" },
-    pokemonData.map((pokemon) =>
+    { className: "md:max-w-6xl max-w-full bg-white mx-auto flex flex-wrap justify-center" },
+    React.createElement(
+      "div",
+      { id: "home", className: "w-full py-8" },
+    ),
+    filteredPokemon.map((pokemon) =>
       React.createElement(PokemonCard, {
         key: pokemon.id,
         id: pokemon.id,
@@ -142,12 +149,73 @@ function App() {
     { className: "bg-[url('./assets/svg/bg.svg')]", },
     React.createElement(
       "header",
-      { className: "" },
+      { className: "md:max-w-6xl max-w-full mx-auto bg-white" },
       React.createElement(
-        "h1",
-        { className: "text-3xl text-center font-bold underline" },
-        "Pokedex"
-      )
+        "div",
+        { className: "flex md:max-w-6xl mx-auto w-full items-center justify-between p-4 fixed top-0 z-10 bg-white" },
+        React.createElement(
+          "button",
+          {
+            className: "flex justify-center items-center gap-2 bg-[#4fa8d7] hover:bg-[#71a3c1] text-white font-bold py-2 px-4 rounded",
+            onClick: () => {
+              filteredPokemon.sort(() => 0.5 - Math.random());
+              renderApp();
+            },
+          },
+          React.createElement(
+            "svg",
+            {
+              fill: "white",
+              // height: "24px",
+              width: "16px",
+              version: "1.1",
+              xmlns: "http://www.w3.org/2000/svg",
+              viewBox: "0 0 512 512",
+              "xml:space": "preserve",
+            },
+            React.createElement("path", {
+              d: "M341.3,28.3v85.3H128c-70.7,0-128,57.3-128,128c0,21.5,5.8,41.4,15.2,59.2L68,263.2c-2.4-6.8-4-13.9-4-21.5 c0-35.4,28.7-64,64-64h213.3V263L512,156.3V135L341.3,28.3z M444,262.8c2.4,6.8,4,13.9,4,21.5c0,35.4-28.6,64-64,64H170.7V263 L0,369.7V391l170.7,106.7v-85.3H384c70.7,0,128-57.3,128-128c0-21.5-5.8-41.4-15.2-59.2L444,262.8z"
+            })
+          ),
+          React.createElement(
+            "span",
+            { className: "font-bold text-white text-md md:block hidden" },
+            "Surprise Me!"
+          )
+        ),
+        React.createElement(
+          "h1",
+          {
+            className: "md:text-3xl text-lg text-center font-bold cursor-pointer md:block hidden",
+            onClick: (event) => {
+              event.preventDefault();
+              const target = document.getElementById("home");
+              target.scrollIntoView({
+                behavior: "smooth",
+              });
+            }
+          },
+          "Pokedex"
+        ),
+        React.createElement(
+          "select",
+          {
+            className: "bg-[#4fa8d7] hover:bg-[#71a3c1] text-white font-bold py-2 px-4 rounded cursor-pointer z-10 md:text-md text-sm",
+            onChange: (event) => {
+              const num = parseInt(event.target.value, 10);
+              filteredPokemon = pokemonData.slice(0, num);
+              renderApp();
+            },
+          },
+          [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000].map((num) =>
+            React.createElement(
+              "option",
+              { key: num, value: num },
+              `${num}`
+            )
+          )
+        )
+      ),
     ),
     React.createElement(PokemonList, null)
   );

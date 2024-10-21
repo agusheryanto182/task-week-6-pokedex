@@ -13,7 +13,7 @@ function extractEvolution(chain) {
 }
 
 async function generateJsonDB() {
-  const pokemonApiURL = "https://pokeapi.co/api/v2/pokemon?limit=100";
+  const pokemonApiURL = "https://pokeapi.co/api/v2/pokemon?limit=1000";
 
   const response = await fetch(pokemonApiURL);
   const data = await response.json();
